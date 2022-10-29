@@ -11,14 +11,14 @@ from django.contrib.auth.models import Group
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'is_staff']
+        fields = ["id", "username", "email", "first_name", "last_name", "full_name",]
 
 
 # Serialize the `Group` table.
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Group
-        fields = ['url', 'name']
+        fields = ["url", "name"]
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -31,13 +31,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'username', 'password',)
+        fields = ("email", "username", "password",)
         # Extra security to ensure that passwords are only allowed to be written
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
         # Remove the password from the validated data
-        password = validated_data.pop('password', None)
+        password = validated_data.pop("password", None)
         # As long as the other fields exactly match the model, can set the object to the model fields
         instance = self.Meta.model(**validated_data)
         # Verify a password was supplied

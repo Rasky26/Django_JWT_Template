@@ -5,25 +5,25 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 # Import the `User` views
 from accounts import views
-from accounts.views import RegisterUser, BlacklistTokenUpdateView
+from accounts.views import CurrentUserViewSet, RegisterUser, BlacklistTokenUpdateView
 
-
-router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'groups', views.GroupViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    # Contains links to `/users` and `/groups`
-    path('', include(router.urls)),
-    # Login / Logout methods --> can be removed later...
-    path('', include('rest_framework.urls', namespace='rest_framework')),
-    # Get a session and refresh token
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # Login / Logout methods provided by django-rest-framework
+    # #    --> can be removed later...
+    # path('', include('rest_framework.urls', namespace='rest_framework')),
+    
+    # Access the current user's information.
+    # Because I use a generic `Viewset` in views.py, I have to specify the acceptable
+    # methods. In this case, the only method being allowed is `get`.
+    path("user/", CurrentUserViewSet.as_view({'get': 'get'}), name="current_user"),
     # Get a new refresh token
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    # 
+    # Get a session and refresh token
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # Register a new user
     path('register/', RegisterUser.as_view(), name="register_user"),
     path('logout/blacklist/', BlacklistTokenUpdateView.as_view(), name='blacklist')
 ]

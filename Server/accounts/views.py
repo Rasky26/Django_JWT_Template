@@ -1,9 +1,10 @@
 # Import the core libraries and functions
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -19,21 +20,19 @@ from accounts.serializers import RegistrationSerializer, GroupSerializer, UserSe
 # https://www.django-rest-framework.org/tutorial/quickstart/#views
 # ----------------------------------------------------------------
 
-# ViewSets that returns a serialized `User` object
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+class CurrentUserViewSet(viewsets.ViewSet):
     permission_classes = (permissions.IsAuthenticated,)
 
-
-# ViewSets that returns a serialized 'Group' object
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    def get(self, request):
+        """
+        Returns the current user based on their token authentication information.
+        This restricts the user's information by binding it directly with
+        the current token.
+        """
+        queryset = User.objects.all()
+        user = get_object_or_404(queryset, pk=request.auth.payload["user_id"])
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # Creates a new user in the system

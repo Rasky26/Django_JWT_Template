@@ -53,7 +53,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
 
-    # Place CORS high in the importance list
+    # Place CORS high in the importance list, specifically above
+    # the middleware functions
     'corsheaders.middleware.CorsMiddleware',
 
     'django.middleware.common.CommonMiddleware',
@@ -168,6 +169,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Simple JWT settings
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
 SIMPLE_JWT = {
+    # Access token is only valid for this timelength. Once that time
+    # expires, a new access token will need to be granted using
+    # the `refresh_token`
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=10),
     'ROTATE_REFRESH_TOKENS': True,
@@ -175,8 +179,10 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
+    # Used with header: `Authorization: JWT <access_token>`
     'AUTH_HEADER_TYPES': ('JWT',),
     'USER_ID_FIELD': 'id',
+    # The key-value name stored (encrypted) in the token
     'USER_ID_CLAIM': 'user_id',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',

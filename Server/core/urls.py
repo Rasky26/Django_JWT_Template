@@ -17,7 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+
+# Base URL patterns that allow access to different server Apps
 urlpatterns = [
+    # Provides server path / access to the `accounts` URLS
     path('accounts/', include('accounts.urls')),
+    # Built-in Django admin site.
+    # Accessed via: http://localhost:8000/admin (development)
     path('admin/', admin.site.urls),
 ]
