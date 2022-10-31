@@ -1,39 +1,3 @@
-# Import the core libraries and functions
-# from django.contrib.auth.models import AbstractUser
-
-
-# # Abstract the `User` model, allowing for later updates
-# # to be made to that database table.
-# class User(AbstractUser):
-#     pass
-
-#     def __str__(self):
-#         """
-#         Display the user's name based on provided information.
-#         """
-#         if (not self.first_name) and (not self.last_name):
-#             return f"{self.username}"
-#         elif not self.first_name:
-#             return f"{self.username} | {self.last_name}"
-#         elif not self.last_name:
-#             return f"{self.username} | {self.first_name}"
-#         return f"{self.username} | {self.first_name} {self.last_name}"
-
-#     def display_name(self):
-#         """
-#         Returns a name string for easy display.
-#         """
-#         return self.__str__()
-            
-#     # Set the database information
-#     class Meta:
-#         verbose_name = "User"
-#         verbose_name_plural = "Users"
-#         ordering = (
-#             "last_name",
-#             "first_name",
-#         )
-
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
@@ -43,7 +7,11 @@ from django.utils.translation import gettext_lazy as _
 
 class CustomAccountManager(BaseUserManager):
 
-    def create_superuser(self, email, user_name, first_name, password, **other_fields):
+    def create_superuser(self, email, username, password, first_name="", last_name="", **other_fields):
+        """
+        Function that creates a SUPERUSER that has total access to
+        server operations and database values.
+        """
 
         other_fields.setdefault('is_staff', True)
         other_fields.setdefault('is_superuser', True)
@@ -57,17 +25,29 @@ class CustomAccountManager(BaseUserManager):
         if other_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must be assigned to is_superuser=True.')
 
-        return self.create_user(email, user_name, first_name, password, **other_fields)
+        return self.create_user(email, username, password, first_name, last_name, **other_fields)
 
-    def create_user(self, email, user_name, first_name, password, **other_fields):
+    def create_user(self, email, username, password, first_name="", last_name="", **other_fields):
+        """
+        Function that creates a standard user that is registered on the server
+        """
 
+        # Users MUST provide an email
         if not email:
             raise ValueError(_('You must provide an email address'))
 
+        # Validate and normalize the email
         email = self.normalize_email(email)
-        user = self.model(email=email, user_name=user_name,
-                          first_name=first_name, **other_fields)
+        # Create the user based on provided fields
+        user = self.model(
+            email=email,
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            **other_fields)
+        # Set the password for the user based on the `set_password` routine
         user.set_password(password)
+        # Save the user fields to the DB
         user.save()
         return user
 
@@ -83,13 +63,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')
     date_joined = models.DateTimeField(default=timezone.now, verbose_name='date joined')
 
+    # Extends the functions of the base `User` model with
+    # custom functions
     objects = CustomAccountManager()
 
+    # This sets the login to utilize the `email` field to login 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name']
+    # Required fields that a superuser MUST supply when creating an account
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
-    # def __str__(self):
-    #     return self.user_name
 
     def __str__(self):
         """
@@ -103,7 +85,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             return f"{self.username} | {self.first_name}"
         return f"{self.username} | {self.first_name} {self.last_name}"
 
-    def display_name(self):
+    def full_name(self):
         """
         Returns a name string for easy display.
         """
