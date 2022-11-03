@@ -4,7 +4,6 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 # Import the `User` views
-from accounts import views
 from accounts.views import CurrentUserViewSet, RegisterUser, BlacklistTokenUpdateView
 
 
@@ -14,7 +13,7 @@ urlpatterns = [
     # Login / Logout methods provided by django-rest-framework
     # #    --> can be removed later...
     # path('', include('rest_framework.urls', namespace='rest_framework')),
-    
+
     # Update
     # Access the current user's information.
     # Because I use a generic `Viewset` in views.py, I have to specify the acceptable

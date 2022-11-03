@@ -42,19 +42,25 @@ class RegisterUser(CreateAPIView):
     permission_classes = (AllowAny,)
 
     # Validates a new user's information, saves it, and returns that user information
-    def post(self, request, format='json'):
+    def post(self, request):
+        """
+        Method that takes in the new user information and adds a unique
+        user to the database. Returns the registration data with the
+        password removed.
+        """
         # Set the JSON data to the serailizer object
         serializer = RegistrationSerializer(data=request.data)
         # Validate the data as valid
         if serializer.is_valid():
-            # Save the data to the database and return it to a `user` variable
+            # Save the data to the database and return it to a `user` variable.
+            # Look at the serializer's `create` method.
             user = serializer.save()
             # Check that a valid save was made
             if user:
                 # Get the user data in JSON format
-                json = serializer.data
+                json_response = serializer.data
                 # Return that data to the user with a 201 status
-                return Response(json, status=status.HTTP_201_CREATED)
+                return Response(json_response, status=status.HTTP_201_CREATED)
         # If any error occured, return a 400 with errors
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -66,6 +72,10 @@ class BlacklistTokenUpdateView(APIView):
     authentication_classes = ()
 
     def post(self, request):
+        """
+        Upon logout, take the "request_token" from the request
+        and add it to the blacklist model.
+        """
         try:
             refresh_token = request.data["refresh_token"]
             token = RefreshToken(refresh_token)
