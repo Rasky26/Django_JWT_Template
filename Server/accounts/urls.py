@@ -4,7 +4,6 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 # Import the `User` views
-from accounts import views
 from accounts.views import CurrentUserViewSet, RegisterUser, BlacklistTokenUpdateView
 
 
